@@ -1,0 +1,61 @@
+Prompt: I would like to place an order for the following paper supplies for the reception: 
+
+- 200 sheets of A4 white printer paper
+- 100 sheets of A3 glossy paper
+- 50 packets of 100% recycled kraft paper envelopes
+
+I need these supplies delivered by April 10, 2025. Thank you. (Date of request: 2025-04-07)
+internal_response: Actions performed (summary):
+- Generated financial report for 2025-04-07.
+- Recorded customer request details from the email: requested items (A4 white printer paper — 200 sheets; A3 glossy paper — 100 sheets; 100% recycled kraft paper envelopes — 50 packets), request date 2025-04-07, desired delivery 2025-04-10.
+- Retrieved delivery address: Jason Sanders, 1913 montrose st., Waterloo, British Columbia, A2I4D8.
+- Checked inventory levels with Inventory Manager: A4 paper on hand = 0 (requested 200); Glossy paper on hand = -2113 (requested 100); Kraft paper on hand = 493 (requested 50).
+- Determined stock needs: need stock order A4 paper = 200; Glossy paper = 2213 (to cover deficit plus requested 100); Kraft paper = 0 (in stock).
+- Obtained customer pricing from Quoting Manager and calculated totals: A4 paper 200 × $0.05 = $10.00; Glossy paper 100 × $0.20 = $20.00; Kraft envelopes 50 × $0.10 = $5.00. Subtotal for full request = $35.00; HST 13% = $4.55; Total = $39.55.
+- Checked delivery feasibility with Ordering Manager: only Kraft envelopes can be delivered by the requested date. Ordering Manager provided supplier ETAs for replenishment: A4 paper supplier ETA 2025-04-11; Glossy paper supplier ETA 2025-04-14. Expected customer delivery for the in-stock Kraft envelopes is 2025-04-08.
+- Placed sales order for viable items: Sales order ID 59 created for Kraft paper envelopes (50 packets) to ship to the address above. Sales order details: pre-tax $5.00, HST (13%) $0.65, total $5.65. Ship date recorded 2025-04-07; expected arrival by 2025-04-08 (meets requested 2025-04-10).
+- Prepared stock-order plan for out-of-stock items (not charged to customer and not finalized because supplier prices were not provided): A4 paper stock order qty 200 (supplier ETA 2025-04-11); Glossy paper stock order qty 2213 (supplier ETA 2025-04-14). No supplier taxes apply. These stock orders have not been finalized/charged; they will be placed once supplier pricing is provided/confirmed.
+- Blockers/notes: A4 and Glossy cannot be delivered by 2025-04-10 from current inventory. We did not finalize supplier stock_orders because supplier unit prices were not available for recording; per process we do not charge the customer for supplier stock_orders now. The system recorded the immediate sale for the in-stock item (Kraft envelopes) and created placeholders/ETAs for the replenishment needs.
+
+Resulting state:
+- Sales order completed: Order ID 59 (Kraft envelopes, 50 packets), shipped to Jason Sanders, 1913 montrose st., Waterloo, BC A2I4D8, expected delivery 2025-04-08.
+- Pending replenishment: A4 paper (200) ETA 2025-04-11; Glossy paper (2213) ETA 2025-04-14. No charges applied to customer for these stock_orders yet.
+
+Next actions for customer (required): Because not all requested items can be delivered by 2025-04-10, please let us know which of the following you prefer:
+  a) Cancel this order entirely (we will cancel Sales Order 59 and any pending stock_order actions).
+  b) Complete the order for the delayed items as well, and ship all items together when the delayed items arrive (we will finalize and place stock_orders for A4 and Glossy; you will be charged for all items when we confirm fulfillment/shipping).
+  c) Cancel the delayed item(s) only — keep the current order for Kraft envelopes (Order ID 59) and cancel A4 and/or Glossy restock attempts.
+
+If you choose (b), we will request supplier prices to finalize stock_orders and will then confirm final costs and ETAs. If you choose (c) we will proceed with the current Kraft envelopes delivery only (no further action required).
+response_to_client: Thank you — I placed the in-stock portion of your order and here are the details.
+
+What I placed now:
+- 50 packets — 100% recycled kraft paper envelopes
+  - Sales order ID: 59
+  - Ship to: Jason Sanders, 1913 montrose st., Waterloo, BC A2I4D8
+  - Expected delivery to you: 2025-04-08 (meets your 2025-04-10 deadline)
+  - Price breakdown: pre-tax $5.00; HST (13%) $0.65; Total $5.65
+
+Items that cannot be delivered by 2025-04-10 from current stock:
+- A4 white printer paper — 200 sheets (on-hand 0). We would need a stock order of 200; supplier ETA 2025-04-11.
+- A3 glossy paper — 100 sheets (on-hand -2113). To cover deficit plus your request we need a stock order of 2213; supplier ETA 2025-04-14.
+
+Full quote for all requested items (if you want us to fulfill everything when restocked):
+- A4 paper (200 × $0.05) = $10.00
+- Glossy paper (100 × $0.20) = $20.00
+- Kraft envelopes (50 × $0.10) = $5.00
+  Subtotal = $35.00
+  HST (13%) = $4.55
+  Total = $39.55
+
+Notes:
+- We have placed only the in-stock item (Kraft envelopes). A4 and Glossy require supplier restock; we have ETAs but have not finalized stock orders because supplier pricing is required to record the restocking. There is no supplier tax on restocking.
+
+Please reply with one of the options below so we can proceed (no other details needed):
+  a) Cancel this order entirely.
+  b) Complete the order for the delayed items as well, and ship all at once when the delayed items arrive.
+  c) Cancel the delayed item(s) only and keep the Kraft envelopes order (Order ID 59).
+
+If you choose (b), I will finalize stock orders for A4 and Glossy and return final supplier-confirmed ETAs and the final invoice when the items are ready to ship.
+
+Thank you — I’m standing by for your choice so we can proceed.
