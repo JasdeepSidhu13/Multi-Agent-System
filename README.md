@@ -1,24 +1,35 @@
 # Setup
 
-This repository contains a Python-based multi-agent system for Beaver's Choice Paper Company. The system reads customer quote and order requests, checks inventory and historical quote context, decides whether orders can be fulfilled on time, records supplier and sales transactions, and produces customer-facing responses.
+This repository contains a Python multi-agent system for Beaver's Choice Paper
+Company. The system reads customer quote and order requests, checks available
+inventory, searches historical quote context, estimates fulfillment dates,
+records supplier and customer transactions, and returns customer-friendly order
+or quote responses.
 
-Repository: https://github.com/JasdeepSidhu13/Multi-Agent-System
+Repository: <https://github.com/JasdeepSidhu13/Multi-Agent-System>
 
-## 1. Prerequisites
+## Prerequisites
 
-- Python 3.10 or newer is recommended.
-- Access to the model endpoint used by the project.
-- A valid `UDACITY_OPENAI_API_KEY` value for the Vocareum OpenAI-compatible API.
+- Python 3.10 or newer.
 - Git, if you are cloning the repository locally.
+- Access to the Vocareum OpenAI-compatible API endpoint used by the project.
+- A valid `UDACITY_OPENAI_API_KEY`.
 
-## 2. Clone the repository
+The application uses Pydantic AI agents backed by OpenAI-compatible chat models.
+Without a valid API key and endpoint access, dependency installation can still
+succeed, but running the multi-agent workflow will fail when the agents call the
+model.
+
+## Clone the repository
 
 ```bash
 git clone https://github.com/JasdeepSidhu13/Multi-Agent-System.git
 cd Multi-Agent-System
 ```
 
-## 3. Create and activate a virtual environment
+## Create and activate a virtual environment
+
+Create a virtual environment from the repository root.
 
 On macOS or Linux:
 
@@ -34,9 +45,9 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-After activation, your terminal prompt should show the virtual environment name, usually `(.venv)`.
+After activation, your terminal prompt should usually include `(.venv)`.
 
-## 4. Install dependencies
+## Install dependencies
 
 Install the pinned dependencies from `requirements.txt`:
 
@@ -45,30 +56,34 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-The project currently depends on:
+The project uses:
 
-- `pandas` for CSV loading, tabular transformations, and result exports
-- `numpy` for deterministic sample inventory generation
-- `SQLAlchemy` for SQLite access
-- `python-dotenv` for environment variable loading
-- `pydantic-ai` for agent definitions, model calls, tools, and structured outputs
-- `pydantic` models through `pydantic-ai`
+- `pandas` for loading CSV files, transforming data, writing result files, and
+  moving tabular data into SQLite.
+- `numpy` for deterministic sample inventory generation.
+- `SQLAlchemy` for database access.
+- `python-dotenv` for loading local environment variables from `.env`.
+- `pydantic-ai` for defining agents, tools, model calls, usage limits, and
+  structured outputs.
+- `pydantic`, installed through `pydantic-ai`, for typed request, response, and
+  shared-state schemas.
 
-## 5. Configure environment variables
+## Configure environment variables
 
-The repository includes `example.env` as a safe template. Copy it to a local `.env` file:
+The repository includes `example.env` as a safe template. Copy it to `.env`:
 
 ```bash
 cp example.env .env
 ```
 
-Then replace the placeholder value with your actual key:
+Edit `.env` and replace the placeholder with your real key:
 
 ```env
-UDACITY_OPENAI_API_KEY="OUR OPEN AI API KEY"
+UDACITY_OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 ```
 
-The code creates OpenAI-compatible models through:
+The code reads this variable with `load_dotenv()` and passes it into an
+OpenAI-compatible provider:
 
 ```python
 OpenAIProvider(
@@ -77,23 +92,42 @@ OpenAIProvider(
 )
 ```
 
-Do not commit real API keys or other secrets. Keep real credentials only in your local `.env` file.
+Do not commit real API keys. Keep secrets only in your local `.env` file.
 
-## 6. Verify required data files
+## Required project files
 
-Run the project from the repository root so the script can find the CSV files and SQLite database path. The main runtime expects these files:
+Run the project from the repository root so relative paths resolve correctly.
+The main script expects these files to be present:
 
-- `project_solution.py` - main application and multi-agent system
-- `requirements.txt` - Python dependency list
-- `example.env` - safe environment variable template to copy into a local `.env`
-- `quote_requests.csv` - historical customer quote request data loaded into SQLite
-- `quotes.csv` - historical quote outcomes and quote explanations
-- `quote_requests_sample.csv` - sample requests used by `run_test_scenarios()`
-- `munder_difflin.db` - SQLite database file created or refreshed by the script
+```text
+.
+|-- README.md
+|-- example.env
+|-- project_solution.py
+|-- requirements.txt
+|-- quote_requests.csv
+|-- quote_requests_sample.csv
+|-- quotes.csv
+`-- test_results.csv
+```
 
-## 7. Run the multi-agent system
+Important files:
 
-From the repository root with the virtual environment active:
+- `project_solution.py`: Main application file. It contains database setup,
+  catalog data, utility functions, Pydantic schemas, agent definitions, tools,
+  orchestration logic, response sanitization, and scenario execution.
+- `quote_requests.csv`: Historical customer quote requests loaded into SQLite.
+- `quotes.csv`: Historical quote totals and quote explanations loaded into
+  SQLite for quote-history retrieval.
+- `quote_requests_sample.csv`: Sample customer requests processed when the main
+  script runs.
+- `test_results.csv`: Results from a previous run. Running the script can
+  overwrite this file.
+- `example.env`: Environment variable template for local configuration.
+
+## Run the multi-agent system
+
+With the virtual environment active and `.env` configured:
 
 ```bash
 python project_solution.py
@@ -101,176 +135,200 @@ python project_solution.py
 
 The script will:
 
-1. Initialize the SQLite database.
-2. Load historical quote request data and quote records.
-3. Generate sample inventory records.
-4. Process every row in `quote_requests_sample.csv`.
-5. Run the multi-agent orchestration flow for each request.
-6. Write individual response logs and aggregate results.
+1. Configure local Logfire/logging output.
+2. Initialize `munder_difflin.db`.
+3. Load historical quote requests from `quote_requests.csv`.
+4. Load historical quotes from `quotes.csv`.
+5. Generate a deterministic sample inventory from the in-code product catalog.
+6. Load and sort sample customer requests from `quote_requests_sample.csv`.
+7. Run the multi-agent orchestration workflow for each sample request.
+8. Write per-request response logs.
+9. Write aggregate results to `test_results.csv`.
+10. Print a final financial report.
 
-## 8. Runtime outputs
+## Generated runtime files
 
-Running the script can create or update the following files:
+Running the script can create or update:
 
-- `munder_difflin.db` - SQLite database containing inventory, quotes, requests, and transactions
-- `agent_trace.log` - local trace/log output for agent activity
-- `output_YYYY-MM-DD_HH-MM-SS.txt` - per-request prompt and response logs
-- `test_results.csv` - aggregate results from the sample scenario run
+- `munder_difflin.db`: SQLite database created by `project_solution.py`.
+- `agent_trace.log`: Local trace/log file for Logfire-related logging.
+- `output_YYYY-MM-DD_HH-MM-SS.txt`: Per-request prompt and response logs.
+- `test_results.csv`: Aggregate scenario results.
 
-If you want a clean run, delete old `output_*.txt`, `test_results.csv`, `agent_trace.log`, and `munder_difflin.db` before executing the script again. The script also calls `init_database(db_engine)` at startup, which recreates the main database tables for the test scenario.
+For a clean run, remove old generated files before starting:
+
+```bash
+rm -f munder_difflin.db agent_trace.log output_*.txt test_results.csv
+python project_solution.py
+```
+
+Be careful with `test_results.csv` if you want to preserve a previous run.
 
 # Project overview
 
-The project models a paper supplier's sales workflow with a multi-agent architecture. Instead of using one monolithic prompt for every task, the system separates responsibilities across specialist agents. A central orchestration agent receives the customer request and delegates focused work to inventory, quoting, ordering, and data-extraction agents. These agents use structured Pydantic models and tool functions to read and update shared state.
+The project models an order-management workflow for Beaver's Choice Paper
+Company. Customers ask for paper or paper-related products, quantities, and
+delivery dates. The system decides whether Beaver's Choice can fulfill the
+request, whether it must buy more stock from a supplier, what customer delivery
+date is feasible, and how to respond with pricing.
 
-At a high level, the system answers questions such as:
+The key design choice is to split work across specialist agents instead of
+asking one model prompt to do everything. A central orchestration agent manages
+the request and delegates narrower tasks to inventory, quoting, ordering, and
+data-extraction agents. Shared Pydantic state connects these agents so each
+agent can reuse facts already discovered by earlier steps.
 
-- What products did the customer request?
-- Which internal catalog items best match those products?
-- How much inventory is currently available?
-- Does Beaver's Choice need to place supplier stock orders?
-- Can the requested items arrive by the customer's desired delivery date?
-- What price should the customer be quoted?
-- Which sales and stock-order transactions should be recorded?
-- What customer-safe response should be returned?
+At a high level, the system answers:
 
-# Repository structure
-
-```text
-.
-|-- Agentic_system_diagram.png
-|-- beavers-choice-multi-agent-reflection-report.pdf
-|-- project_solution.py
-|-- requirements.txt
-|-- example.env
-|-- quote_requests.csv
-|-- quote_requests_sample.csv
-|-- quotes.csv
-|-- munder_difflin.db
-|-- agent_trace.log
-|-- output_*.txt
-`-- test_results.csv
-```
-
-Important files:
-
-- `project_solution.py`: The main source file. It contains database setup, utility functions, Pydantic schemas, agent definitions, tools, orchestration logic, response sanitization, and scenario execution.
-- `example.env`: Safe environment variable template. Copy this to `.env` locally and replace the placeholder value before running the system.
-- `Agentic_system_diagram.png`: A visual diagram of the agentic system.
-- `beavers-choice-multi-agent-reflection-report.pdf`: Supporting report/reflection for the project.
-- `quote_requests.csv`: Historical quote requests used to seed the database.
-- `quotes.csv`: Historical quote totals, explanations, and request metadata used by the quoting flow.
-- `quote_requests_sample.csv`: Scenario inputs processed by the system when the main script runs.
-- `test_results.csv`: Output summary from a completed run.
+- What does the customer want?
+- What date was the request made?
+- Which internal catalog items match the customer wording?
+- How many units were requested?
+- What stock is available on the request date?
+- What stock must be ordered from the supplier?
+- Can items reach the customer by the desired date?
+- What quote should the customer receive?
+- Which supplier stock orders and customer sales should be recorded?
+- What response can be safely shown to the customer?
 
 # How the multi-agent system works
 
-## Core business scenario
+## End-to-end flow
 
-Beaver's Choice Paper Company sells paper and paper-adjacent products such as A4 paper, cardstock, colored paper, glossy paper, poster paper, envelopes, paper cups, paper plates, napkins, and specialty paper stock.
+When `python project_solution.py` runs, `run_test_scenarios()` performs the main
+workflow:
 
-Customer requests usually include:
+1. Rebuilds the SQLite database by calling `init_database(db_engine)`.
+2. Reads `quote_requests_sample.csv`.
+3. Converts and sorts request dates.
+4. Generates an initial financial report for the earliest sample date.
+5. For each sample request:
+   - Adds the request date to the prompt.
+   - Creates a fresh `SharedState`.
+   - Wraps that state in `Deps`.
+   - Runs the orchestration agent synchronously.
+   - Lets the orchestrator call worker agents through tools.
+   - Sanitizes the customer-facing response.
+   - Writes an `output_*.txt` file containing the prompt, internal response,
+     and final customer response.
+   - Recomputes cash and inventory value after the request.
+   - Adds the result to an in-memory list.
+6. Writes all results to `test_results.csv`.
+7. Prints final cash and inventory value.
 
-- The products needed
-- Quantities
-- Event or business context
-- Desired delivery date
-- Request date
+## Architecture summary
 
-The system must decide whether each request can be quoted, fulfilled, partially fulfilled, or delayed. It also records inventory-impacting transactions in SQLite.
-
-## Database layer
-
-The database uses SQLite through SQLAlchemy:
-
-```python
-db_engine = create_engine("sqlite:///munder_difflin.db")
+```text
+Customer/sample request
+        |
+        v
+Orchestration Agent
+        |
+        |-- Data Extraction Agent
+        |-- Inventory Agent
+        |-- Quoting Agent
+        `-- Ordering Agent
+        |
+        v
+SharedState + SQLite tools
+        |
+        v
+Customer-safe response + transaction/results files
 ```
 
-The main database setup happens in `init_database(db_engine)`. It creates and populates these tables:
+The orchestration agent is the manager. It does not directly perform every
+business operation itself. Instead, it calls tools that either update shared
+state or delegate to worker agents. Worker agents return structured
+`WorkerOutput` objects so the orchestrator can reason over their results.
 
-- `quote_requests`: Customer request text loaded from `quote_requests.csv`
-- `quotes`: Historical quote totals and explanations loaded from `quotes.csv`
-- `inventory`: Generated inventory snapshot for a subset of catalog items
-- `transactions`: Sales and supplier stock-order records
+## Models and provider configuration
 
-Key database helper functions include:
+`project_solution.py` configures two OpenAI-compatible chat models through
+Pydantic AI:
 
-- `generate_sample_inventory(...)`: Creates a deterministic inventory sample using a random seed.
-- `init_database(...)`: Rebuilds the SQLite tables and seeds initial stock and cash.
-- `create_transaction(...)`: Records `stock_orders` and `sales`.
-- `get_all_inventory(...)`: Computes inventory quantities as of a date.
-- `get_stock_level(...)`: Computes current stock for one item as of a date.
-- `get_cash_balance(...)`: Calculates available cash from sales minus stock purchases.
-- `generate_financial_report(...)`: Produces cash, inventory valuation, total assets, inventory summary, and top-selling product data.
-- `search_quote_history(...)`: Searches past quote requests and quote explanations.
+- `gpt-5-mini`: Used by the orchestration agent and data-extraction agent.
+- `gpt-5-nano`: Used by worker agents such as inventory, quoting, and ordering.
 
-## Catalog and inventory model
-
-The product catalog is represented by the `paper_supplies` list in `project_solution.py`. Each catalog item includes:
-
-- `item_name`
-- `category`
-- `unit_price`
-
-The generated inventory covers a subset of the catalog. Inventory changes are not stored only as a static quantity. Instead, the system calculates stock from the transaction ledger:
-
-- `stock_orders` add units.
-- `sales` subtract units.
-
-This means inventory is date-aware. A stock check for one date can produce different results than a stock check for a later date after additional transactions have been recorded.
-
-## Pydantic schemas
-
-The system uses Pydantic models to keep agent inputs and outputs structured. Important schemas include:
-
-- `SharedState`: The central request state shared by all agents.
-- `Deps`: Dataclass wrapper that passes `SharedState` into Pydantic AI tools.
-- `EmailDetails`: Structured extraction result for customer requests.
-- `OrchestrationCall`: Work order from the orchestration agent to a specialist agent.
-- `OrchestrationResponse`: Final structured response with internal and customer-facing text.
-- `WorkerOutput`: Standard response format from specialist agents.
-- `FinancialReport`, `InventoryItemSummary`, `TopSellingProduct`: Financial reporting schemas.
-- `StockLevel`: Structured inventory lookup result.
-- `SupplierDelivery` and `CustomerDelivery`: Delivery estimate schemas.
-- `OrderRecord`: Recorded transaction details.
-
-Using explicit schemas helps reduce ambiguity between agents. Each agent is expected to return a defined structure rather than free-form text only.
-
-## Model configuration
-
-The project creates two OpenAI-compatible chat models with Pydantic AI:
-
-- `gpt-5-mini`: Used for the orchestration agent and data extraction agent.
-- `gpt-5-nano`: Used for worker agents such as inventory, quoting, and ordering.
-
-Both models use the Vocareum OpenAI-compatible endpoint and are wrapped with Pydantic AI instrumentation settings. Logfire is configured locally with:
+Both models use:
 
 ```python
-logfire.configure(service_name="beavers-choice", send_to_logfire=False)
+base_url="https://openai.vocareum.com/v1"
 ```
 
-Because `send_to_logfire=False`, tracing is configured for local logging rather than remote Logfire export.
+The API key is loaded from:
+
+```python
+UDACITY_OPENAI_API_KEY
+```
+
+Model instrumentation is configured through
+`pydantic_ai.models.instrumented.instrument_model`. Logfire is configured with
+`send_to_logfire=False`, so the repository writes local trace/log output instead
+of sending traces to a hosted Logfire service.
+
+## Shared state
+
+Every request starts with a new shared state object:
+
+```python
+shared_state = SharedState()
+deps = Deps(state=shared_state)
+```
+
+`SharedState` is the in-memory coordination object used by tools and agents.
+Important fields include:
+
+- `goals_of_request`: What the customer is asking for.
+- `request_date`: Date the request was made.
+- `items_names_requested_from_customer`: Item names as written by the customer.
+- `items_names_requested_match_from_financial_report`: Internal item-name
+  matches.
+- `quantity_of_items_requested`: Requested quantities.
+- `quantity_of_items_stock_order`: Additional supplier stock required.
+- `desired_delivery_date`: Customer's target delivery date.
+- `shipping_address`: Generated delivery address.
+- `inventory_levels_of_all_products`: Full stock snapshot when requested.
+- `stock_level_specific_items`: Per-item stock checks.
+- `quote_history`: Historical quote search results.
+- `cash_balance`: Cash balance as of a date.
+- `financial_report`: Current financial report.
+- `supplier_delivery_date`: Supplier-to-company delivery estimates.
+- `customer_delivery_date`: Company-to-customer delivery estimates.
+- `orders_completed`: Supplier stock orders and customer sales recorded during
+  the request.
+- `response_to_customer`: Final customer response, when set.
+- `process_completed`: Workflow completion marker.
+
+The worker prompts instruct agents to check shared state before calling tools.
+That reduces duplicate tool calls and helps preserve a single source of truth
+during each request.
 
 # Agent roles
 
-## 1. Orchestration Agent
+## Orchestration Agent
 
-The orchestration agent is the manager. It receives the customer request and coordinates the rest of the workflow.
+The orchestration agent coordinates the full customer workflow. It receives the
+customer request, follows a required step-by-step plan, and returns an
+`OrchestrationResponse` containing:
 
-Its responsibilities include:
+- `internal_response`: Summary of what the system did.
+- `response_to_client`: Customer-facing response.
+
+Its main responsibilities are:
 
 - Generate a financial report for the request date.
-- Extract request details from the customer message.
-- Retrieve or generate a delivery address.
+- Extract structured request details from the prompt.
+- Generate or retrieve a customer delivery address.
 - Ask the inventory agent to check stock.
 - Determine supplier stock needs.
-- Ask the quoting agent for quote and cash context.
-- Ask the ordering agent to check delivery timing and create transactions.
-- Decide which items are viable, delayed, or unavailable.
-- Return an `OrchestrationResponse`.
+- Ask the quoting agent for quote history and cash context.
+- Ask the ordering agent for delivery estimates.
+- Ask the ordering agent to record supplier stock orders and customer sales.
+- Decide whether all, some, or none of the requested items can be fulfilled on
+  time.
+- Produce customer-safe pricing and delivery messaging.
 
-The orchestration agent has tools such as:
+Orchestration tools:
 
 - `generate_financial_report_dict`
 - `record_email_details`
@@ -280,116 +338,164 @@ The orchestration agent has tools such as:
 - `call_quoting_manager`
 - `call_ordering_manager`
 
-## 2. Data Extraction Agent
+## Data Extraction Agent
 
-The data extraction agent parses the original customer prompt into structured fields:
+The data-extraction agent turns the original customer message into an
+`EmailDetails` object. It extracts:
 
-- Customer goals
-- Request date
-- Requested item names
-- Internal item-name matches
-- Requested quantities
-- Desired delivery date
+- Customer goals.
+- Request date.
+- Requested item names.
+- Closest matching internal item names.
+- Requested quantities.
+- Desired delivery date.
 
-It returns an `EmailDetails` object and updates `SharedState`.
+The `record_email_details` orchestration tool runs this agent and writes the
+result into `SharedState`.
 
-## 3. Inventory Agent
+## Inventory Agent
 
-The inventory agent answers inventory-specific questions. It should make the minimum number of tool calls needed and then stop.
+The inventory agent answers stock questions. It is instructed to make the
+minimum number of tool calls needed and then stop.
 
-It can use:
+Inventory tools:
 
-- `get_inventory_for_date(as_of_date)`
-- `get_stock_level_item(item_name, as_of_date)`
+- `get_inventory_for_date(as_of_date)`: Returns a full inventory snapshot for a
+  date.
+- `get_stock_level_item(item_name, as_of_date)`: Returns stock for a specific
+  item on a date.
 
-Its results are stored in shared state fields such as:
+The inventory agent updates:
 
 - `inventory_levels_of_all_products`
 - `stock_level_specific_items`
 
-## 4. Quoting Agent
+## Quoting Agent
 
-The quoting agent supports pricing decisions and historical quote lookup. It can:
+The quoting agent provides quote context and cash context. It can search similar
+historical quotes and retrieve the cash balance when supplier purchasing
+decisions require financial context.
 
-- Search similar historical quotes.
-- Retrieve cash balance when supplier purchasing decisions need financial context.
-- Return pricing context to the orchestrator.
-
-It can use:
+Quoting tools:
 
 - `search_quote_history_retrieve(search_terms, limit=5)`
 - `get_cash_balance_value(as_of_date)`
 
-Customer-facing quotes must show:
+Customer-facing quotes are expected to include:
 
-- Subtotal before tax
-- HST at 13%
-- Final total
+- Subtotal before tax.
+- HST at 13%.
+- Final total.
 
-The system assumes no shipping charge.
+The orchestration prompt states that customer shipping is free.
 
-## 5. Ordering Agent
+## Ordering Agent
 
-The ordering agent handles delivery estimates and transaction recording. It can:
+The ordering agent handles delivery estimates and transaction recording.
 
-- Estimate supplier delivery dates.
-- Estimate customer delivery dates.
-- Record supplier stock orders.
-- Record customer sales.
+Ordering tools:
 
-It can use:
+- `get_supplier_delivery_date_estimate(item_name, input_date_str, quantity)`:
+  Estimates when supplier stock can arrive at Beaver's Choice.
+- `get_customer_delivery_date_estimate(item_name, input_date_str, quantity)`:
+  Estimates when Beaver's Choice can deliver to the customer.
+- `create_transaction_record(item_name, transaction_type, quantity, price,
+  date_of_trans)`: Records a `stock_orders` or `sales` transaction in SQLite.
 
-- `get_supplier_delivery_date_estimate(item_name, input_date_str, quantity)`
-- `get_customer_delivery_date_estimate(item_name, input_date_str, quantity)`
-- `create_transaction_record(item_name, transaction_type, quantity, price, date_of_trans)`
+The ordering agent is instructed to avoid duplicate transactions by checking
+`SharedState.orders_completed`.
 
-The ordering agent is instructed to avoid duplicate transactions by checking `SharedState.orders_completed`.
+# Database and data model
 
-# Shared state and tool flow
-
-Every request creates a fresh `SharedState` instance:
+The repository uses SQLite through SQLAlchemy:
 
 ```python
-shared_state = SharedState()
-deps = Deps(state=shared_state)
+db_engine = create_engine("sqlite:///munder_difflin.db")
 ```
 
-Agents and tools read from and write to this shared state. For example:
+`init_database(db_engine)` rebuilds and seeds the database each time the script
+runs. It creates or refreshes these tables:
 
-1. `record_email_details` extracts requested products and quantities.
-2. `generate_financial_report_dict` stores a `FinancialReport`.
-3. `get_stock_level_item` appends `StockLevel` records.
-4. `determine_stock_needs` records supplier replenishment quantities.
-5. Delivery estimate tools append supplier and customer delivery dates.
-6. Transaction tools append completed order records.
+- `quote_requests`: Historical request text loaded from `quote_requests.csv`.
+- `quotes`: Historical quote totals and explanations loaded from `quotes.csv`.
+- `inventory`: Generated reference inventory for a subset of catalog items.
+- `transactions`: Ledger of starting cash, starting stock orders, supplier
+  stock orders, and customer sales.
 
-This pattern gives worker agents context without requiring every fact to be repeated in every prompt.
+## Product catalog
 
-# End-to-end request lifecycle
+The product catalog is the `paper_supplies` list in `project_solution.py`. Each
+catalog item has:
 
-When `python project_solution.py` runs, `run_test_scenarios()` performs the complete workflow:
+- `item_name`
+- `category`
+- `unit_price`
 
-1. Print `Initializing Database...`.
-2. Rebuild the SQLite database with historical quote and inventory data.
-3. Load `quote_requests_sample.csv`.
-4. Sort sample requests by request date.
-5. Generate an initial financial report.
-6. For each sample request:
-   - Add the request date to the prompt.
-   - Create a fresh `SharedState`.
-   - Run the orchestration agent synchronously.
-   - Sanitize the customer-facing response.
-   - Write prompt and response details to an `output_*.txt` file.
-   - Regenerate the financial report after the request.
-   - Append the result to an in-memory results list.
-7. Write all results to `test_results.csv`.
-8. Print a final financial report.
+The catalog includes paper types, paper-adjacent products, large-format items,
+and specialty papers, such as:
 
-# Fulfillment decision logic
+- A4 paper
+- Letter-sized paper
+- Cardstock
+- Colored paper
+- Glossy paper
+- Poster paper
+- Paper plates
+- Paper cups
+- Envelopes
+- Large poster paper
+- Rolls of banner paper
+- 250 gsm cardstock
 
-The orchestration prompt defines the central order policy:
+## Inventory generation
 
-## If all requested items can arrive on time
+`generate_sample_inventory(paper_supplies, coverage=0.4, seed=137)` selects a
+deterministic subset of catalog items and assigns each selected item:
+
+- A random starting stock quantity between 200 and 800.
+- A random minimum stock level between 50 and 150.
+
+The seed makes the inventory reproducible across runs.
+
+## Transaction ledger
+
+Inventory is computed from transactions, not only from a static field.
+
+- `stock_orders` add units.
+- `sales` subtract units.
+
+At startup, `init_database` adds:
+
+- A dummy `sales` transaction with `price=50000.0` to represent starting cash.
+- One `stock_orders` transaction for each generated inventory item.
+
+Later, the ordering agent can add supplier stock orders and customer sales.
+
+## Key database helper functions
+
+- `create_transaction(...)`: Appends a `stock_orders` or `sales` transaction.
+- `get_all_inventory(as_of_date)`: Calculates stock for all positive-stock
+  items as of a date.
+- `get_stock_level(item_name, as_of_date)`: Calculates stock for one item as of
+  a date.
+- `get_supplier_delivery_date(input_date_str, quantity)`: Estimates supplier
+  delivery date.
+- `get_customer_delivery_date(input_date_str, quantity)`: Estimates customer
+  delivery date.
+- `get_cash_balance(as_of_date)`: Computes cash from sales minus stock orders
+  up to a date.
+- `generate_financial_report(as_of_date)`: Computes cash balance, inventory
+  value, total assets, inventory summary, and top-selling products.
+- `search_quote_history(search_terms, limit=5)`: Searches historical request and
+  quote text.
+
+# Business rules
+
+## Fulfillment decisions
+
+The orchestration prompt defines three main fulfillment cases.
+
+### All requested items can arrive on time
 
 The system should:
 
@@ -399,77 +505,86 @@ The system should:
 - Include HST at 13%.
 - Confirm delivery timing.
 
-## If some items can arrive on time and others cannot
+### Some items can arrive on time and others cannot
 
 The system should:
 
 - Place or prepare the viable portion.
 - Identify delayed items.
 - Explain the earliest available delivery timing.
-- Ask the customer to choose:
-  - `a) Cancel this order entirely`
-  - `b) Complete the order for the delayed item as well, and ship all at once`
-  - `c) Cancel the delayed item only`
+- Ask whether the customer wants to:
+  - Cancel the entire order.
+  - Complete the delayed item too and ship all items together.
+  - Cancel only the delayed item.
 
-## If an item is not carried or cannot be supplied
+### An item is not carried or cannot be supplied
 
 The system should:
 
 - Complete any viable items.
 - Tell the customer which requested item is unavailable.
-- Offer the customer the option to cancel the entire order.
+- Offer the option to cancel the entire order already placed.
 
-# Delivery date logic
+## Delivery date rules
 
-Supplier delivery lead time is estimated by `get_supplier_delivery_date(...)`:
+Supplier delivery lead time from supplier to Beaver's Choice:
 
-- 10 units or fewer: same day
-- 11 to 100 units: 1 day
-- 101 to 1000 units: 4 days
-- More than 1000 units: 7 days
+| Quantity | Lead time |
+| --- | --- |
+| 10 or fewer | Same day |
+| 11 to 100 | 1 day |
+| 101 to 1000 | 4 days |
+| More than 1000 | 7 days |
 
-Customer delivery lead time is estimated by `get_customer_delivery_date(...)`:
+Customer delivery lead time from Beaver's Choice to the customer:
 
-- 10 units or fewer: same day
-- 11 to 100 units: 1 day
-- 101 to 1000 units: 2 days
-- More than 1000 units: 3 days
+| Quantity | Lead time |
+| --- | --- |
+| 10 or fewer | Same day |
+| 11 to 100 | 1 day |
+| 101 to 1000 | 2 days |
+| More than 1000 | 3 days |
 
-The ordering agent combines these rules:
+If stock is available immediately, customer delivery starts from the request
+date. If supplier stock is needed, customer delivery starts after the supplier
+delivery date.
 
-- If stock is available now, customer delivery starts from the request date.
-- If stock must be ordered from a supplier, customer delivery starts after supplier delivery.
+## Pricing and tax rules
 
-# Pricing and tax rules
-
-The system follows these pricing and tax assumptions:
-
-- Customer quotes must show subtotal, HST, and total.
+- Customer quotes should show subtotal, HST, and final total.
 - HST is 13%.
-- Shipping is free to customers.
+- Customer shipping is free.
 - Supplier stock orders do not add a separate customer-facing tax.
-- Supplier stock-order prices are treated as already tax-inclusive or tax-exempt for internal purchasing.
-- Historical quote search can inform pricing, but the system also uses catalog unit prices from inventory data.
+- Historical quote search can inform context, while catalog unit prices provide
+  the internal price anchors.
 
 # Response sanitization
 
-Before a customer response is saved, it passes through `sanitize_customer_response(text)`.
+Before customer text is saved, it is passed through
+`sanitize_customer_response(text)`. This function replaces or blocks internal
+implementation details such as:
 
-This function masks or replaces internal implementation details such as:
+- Tool calls.
+- Function calls.
+- API references.
+- Database references.
+- Stack traces.
+- Internal request limit wording.
+- Raw transaction identifiers.
+- Cash-balance wording.
 
-- Tool calls
-- Function calls
-- API references
-- Database references
-- Stack traces
-- Internal request limit wording
-- Raw transaction implementation details
+If forbidden internal wording remains after replacement, the function returns a
+generic customer-safe fallback response.
 
-If the response still contains forbidden internal terms after replacement, the function returns a generic customer-safe fallback.
+# Observability
 
-# Logging and observability
+The script configures Logfire locally:
 
-The code configures a local log handler:
+```python
+logfire.configure(service_name="beavers-choice", send_to_logfire=False)
+```
+
+It also attaches a file handler:
 
 ```python
 file_handler = logging.FileHandler("agent_trace.log")
@@ -478,81 +593,97 @@ logger.addHandler(file_handler)
 logger.setLevel(logging.DEBUG)
 ```
 
-This creates `agent_trace.log` during execution. The project also writes per-request files named `output_YYYY-MM-DD_HH-MM-SS.txt`, each containing:
-
-- The prompt sent to the agentic process
-- The internal response
-- The final customer-facing response
+This produces `agent_trace.log` during execution. The per-request `output_*.txt`
+files are also useful for auditing prompts, internal responses, and
+customer-facing responses.
 
 # Troubleshooting
 
-## `UDACITY_OPENAI_API_KEY` is missing
+## Missing API key
 
-Copy `example.env` to `.env` in the repository root:
+If model calls fail because the API key is missing, create `.env` from the
+template and add a valid key:
 
 ```bash
 cp example.env .env
 ```
 
-Then update `.env` so it contains your actual API key:
-
 ```env
-UDACITY_OPENAI_API_KEY="OUR OPEN AI API KEY"
+UDACITY_OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 ```
 
-Also make sure you run the script from the repository root so `load_dotenv()` can find the file.
+Run the script from the repository root so `load_dotenv()` can find `.env`.
 
 ## CSV file not found
 
-Run the script from the repository root:
+The script uses relative paths. Run it from the repository root:
 
 ```bash
 python project_solution.py
 ```
 
-The script expects relative paths such as `quote_requests.csv`, `quotes.csv`, and `quote_requests_sample.csv`.
+Required CSV files:
+
+- `quote_requests.csv`
+- `quotes.csv`
+- `quote_requests_sample.csv`
 
 ## SQLite database is locked
 
-Close any process or notebook that may be using `munder_difflin.db`, then rerun the script. If you do not need the current database state, remove the database file and rerun:
+Close any other process that may be using `munder_difflin.db`. If you do not
+need the current generated database, delete it and rerun:
 
 ```bash
-rm munder_difflin.db
+rm -f munder_difflin.db
 python project_solution.py
 ```
 
 ## Dependency installation fails
 
-Upgrade `pip` and retry:
+Upgrade `pip` and reinstall:
 
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-If you are using a very new Python version and a backport package causes issues, create a fresh virtual environment with Python 3.10 or 3.11 and reinstall.
+If your Python version causes package compatibility issues, recreate the virtual
+environment with Python 3.10 or 3.11 and reinstall.
 
 ## Model or endpoint errors
 
-Confirm:
+Check that:
 
-- The API key is valid.
-- The Vocareum endpoint is reachable.
-- The configured model names are available to your environment.
-- Your account has quota for the number of sample requests in `quote_requests_sample.csv`.
+- `UDACITY_OPENAI_API_KEY` is set and valid.
+- The Vocareum OpenAI-compatible endpoint is reachable.
+- Your environment has access to the configured model names.
+- Your account has enough quota for all requests in `quote_requests_sample.csv`.
+
+## Responses contain too little detail
+
+The sanitizer intentionally removes internal implementation details from
+customer-facing responses. Check the corresponding `output_*.txt` file for the
+raw internal response and final sanitized response.
 
 # Development notes
 
-- Keep generated runtime files out of commits unless they are intentionally part of a report or evaluation.
-- The system is designed around structured Pydantic outputs. When adding a new agent or tool, define the input and output schema first.
-- Prefer adding tools that perform deterministic business operations, such as database reads, transaction writes, or date calculations.
-- Keep customer-facing text free of internal implementation details.
-- When changing fulfillment behavior, update the orchestration prompt and any affected worker-agent instructions together so the agents keep a consistent policy.
+- Keep generated runtime files out of commits unless they are intentionally part
+  of a report or evaluation.
+- Keep `.env` private.
+- When adding a new agent, define its Pydantic input/output schema before
+  expanding its prompt.
+- Prefer deterministic tools for business logic: database reads, transaction
+  writes, inventory calculations, date calculations, and quote-history search.
+- Keep customer-facing output free of implementation details.
+- When changing fulfillment behavior, update both the orchestration prompt and
+  affected worker-agent prompts so policies stay consistent.
+- The agents are instructed to use request dates from the customer/sample data,
+  not the system clock.
 
 # Quick command reference
 
 ```bash
-# Create virtual environment
+# Create and activate a virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
 
@@ -560,10 +691,10 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# Configure secrets
+# Configure local environment variables
 cp example.env .env
-# Then edit .env and replace "OUR OPEN AI API KEY" with your actual key.
+# Edit .env and set UDACITY_OPENAI_API_KEY.
 
-# Run the system
+# Run the scenario workflow
 python project_solution.py
 ```
